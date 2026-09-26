@@ -9,7 +9,9 @@ export default defineConfig({
         path: "prisma/migrations",
     },
     datasource: {
-        url: process.env["DATABASE_URL"],
-        directUrl: process.env["DIRECT_URL"],
+        // CLI schema operations (db push/migrate) need the direct, non-pooled
+        // connection — PgBouncer transaction-mode pooling on DATABASE_URL
+        // hangs on the advisory locks/prepared statements these need.
+        url: process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"],
     },
 });
