@@ -29,7 +29,7 @@ const goalOptions = [
 
 export function ProfileForm({ initial }: ProfileFormProps) {
     const [message, formAction, pending] = useActionState(updateProfile, null);
-    const isError = message === "Нужно войти в систему";
+    const isError = message !== null && message !== "Профиль сохранён";
 
     return (
         <form

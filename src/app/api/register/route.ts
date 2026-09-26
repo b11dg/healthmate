@@ -29,6 +29,10 @@ export async function POST(request: Request) {
                 { status: 409 },
             );
         }
-        throw error;
+        console.error("POST /api/register failed", error);
+        return NextResponse.json(
+            { error: "Service temporarily unavailable" },
+            { status: 503 },
+        );
     }
 }

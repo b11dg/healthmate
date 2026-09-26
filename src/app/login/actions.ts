@@ -1,6 +1,7 @@
 "use server";
 
 import { AuthError } from "next-auth";
+import { unstable_rethrow } from "next/navigation";
 import { signIn } from "@/lib/auth";
 
 export async function loginAction(
@@ -26,10 +27,12 @@ export async function loginAction(
             redirectTo: "/dashboard",
         });
     } catch (error) {
+        unstable_rethrow(error);
         if (error instanceof AuthError) {
             return "Неверный email или пароль";
         }
-        throw error;
+        console.error("loginAction failed", error);
+        return "Не удалось войти — сервис временно недоступен. Попробуйте позже.";
     }
 
     return null;

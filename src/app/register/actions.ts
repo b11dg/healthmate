@@ -1,6 +1,7 @@
 "use server";
 
 import { AuthError } from "next-auth";
+import { unstable_rethrow } from "next/navigation";
 import { signIn } from "@/lib/auth";
 import { createUser, UserAlreadyExistsError } from "@/lib/users";
 
@@ -33,7 +34,8 @@ export async function registerAction(
         if (error instanceof UserAlreadyExistsError) {
             return "Пользователь с таким email уже существует";
         }
-        throw error;
+        console.error("registerAction: createUser failed", error);
+        return "Не удалось зарегистрироваться — сервис временно недоступен. Попробуйте позже.";
     }
 
     try {
@@ -43,10 +45,12 @@ export async function registerAction(
             redirectTo: "/profile",
         });
     } catch (error) {
+        unstable_rethrow(error);
         if (error instanceof AuthError) {
             return "Регистрация прошла, но вход не удался — попробуйте войти вручную";
         }
-        throw error;
+        console.error("registerAction: signIn failed", error);
+        return "Регистрация прошла, но вход не удался — попробуйте войти вручную";
     }
 
     return null;

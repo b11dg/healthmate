@@ -34,11 +34,16 @@ export async function updateProfile(
         restrictions: optionalString(formData.get("restrictions")),
     };
 
-    await prisma.profile.upsert({
-        where: { userId: session.user.id },
-        create: { userId: session.user.id, ...data },
-        update: data,
-    });
+    try {
+        await prisma.profile.upsert({
+            where: { userId: session.user.id },
+            create: { userId: session.user.id, ...data },
+            update: data,
+        });
+    } catch (error) {
+        console.error("updateProfile failed", error);
+        return "Не удалось сохранить профиль — сервис временно недоступен. Попробуйте позже.";
+    }
 
     revalidatePath("/profile");
     return "Профиль сохранён";

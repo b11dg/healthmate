@@ -20,11 +20,16 @@ export async function logWeight(_prevState: string | null, formData: FormData) {
     const weightKg = Number(formData.get("weightKg"));
     if (!weightKg || weightKg <= 0) return "Введите вес в кг";
 
-    await prisma.weightLog.upsert({
-        where: { userId_date: { userId, date: todayDate() } },
-        create: { userId, date: todayDate(), weightKg },
-        update: { weightKg },
-    });
+    try {
+        await prisma.weightLog.upsert({
+            where: { userId_date: { userId, date: todayDate() } },
+            create: { userId, date: todayDate(), weightKg },
+            update: { weightKg },
+        });
+    } catch (error) {
+        console.error("logWeight failed", error);
+        return "Не удалось сохранить вес — сервис временно недоступен. Попробуйте позже.";
+    }
 
     revalidatePath("/dashboard");
     return null;
@@ -43,14 +48,19 @@ export async function logHabit(_prevState: string | null, formData: FormData) {
         return "Укажите воду или сон";
     }
 
-    await prisma.habitLog.upsert({
-        where: { userId_date: { userId, date: todayDate() } },
-        create: { userId, date: todayDate(), waterMl, sleepHours },
-        update: {
-            ...(waterMl !== undefined ? { waterMl } : {}),
-            ...(sleepHours !== undefined ? { sleepHours } : {}),
-        },
-    });
+    try {
+        await prisma.habitLog.upsert({
+            where: { userId_date: { userId, date: todayDate() } },
+            create: { userId, date: todayDate(), waterMl, sleepHours },
+            update: {
+                ...(waterMl !== undefined ? { waterMl } : {}),
+                ...(sleepHours !== undefined ? { sleepHours } : {}),
+            },
+        });
+    } catch (error) {
+        console.error("logHabit failed", error);
+        return "Не удалось сохранить — сервис временно недоступен. Попробуйте позже.";
+    }
 
     revalidatePath("/dashboard");
     return null;
@@ -77,9 +87,21 @@ export async function logMeal(_prevState: string | null, formData: FormData) {
         return "Укажите название и калории";
     }
 
-    await prisma.mealLog.create({
-        data: { userId, name: name.trim(), calories, proteinG, fatG, carbsG },
-    });
+    try {
+        await prisma.mealLog.create({
+            data: {
+                userId,
+                name: name.trim(),
+                calories,
+                proteinG,
+                fatG,
+                carbsG,
+            },
+        });
+    } catch (error) {
+        console.error("logMeal failed", error);
+        return "Не удалось сохранить приём пищи — сервис временно недоступен. Попробуйте позже.";
+    }
 
     revalidatePath("/dashboard");
     return null;
