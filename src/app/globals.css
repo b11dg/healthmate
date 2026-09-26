@@ -10,14 +10,12 @@
     --color-border: rgba(31, 41, 51, 0.12);
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --color-bg: #16181c;
-        --color-surface: #1d2025;
-        --color-text: #ececed;
-        --color-text-secondary: #9aa5b1;
-        --color-border: rgba(255, 255, 255, 0.12);
-    }
+.dark {
+    --color-bg: #16181c;
+    --color-surface: #1d2025;
+    --color-text: #ececed;
+    --color-text-secondary: #9aa5b1;
+    --color-border: rgba(255, 255, 255, 0.12);
 }
 
 @theme inline {

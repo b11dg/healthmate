@@ -7,11 +7,14 @@ datasource db {
 }
 
 model User {
-  id             String   @id @default(cuid())
-  email          String   @unique
+  id             String      @id @default(cuid())
+  email          String      @unique
   hashedPassword String
-  createdAt      DateTime @default(now())
+  createdAt      DateTime    @default(now())
   profile        Profile?
+  weightLogs     WeightLog[]
+  habitLogs      HabitLog[]
+  mealLogs       MealLog[]
 }
 
 model Profile {
@@ -23,4 +26,40 @@ model Profile {
   allergies    String?
   restrictions String?
   updatedAt    DateTime @updatedAt
+}
+
+model WeightLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weightKg  Float
+  date      DateTime @db.Date
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+}
+
+model HabitLog {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date       DateTime @db.Date
+  waterMl    Int?
+  sleepHours Float?
+
+  @@unique([userId, date])
+}
+
+model MealLog {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name     String
+  calories Int
+  proteinG Float?
+  fatG     Float?
+  carbsG   Float?
+  eatenAt  DateTime @default(now())
+
+  @@index([userId, eatenAt])
 }
