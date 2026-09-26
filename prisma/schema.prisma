@@ -15,6 +15,7 @@ model User {
   weightLogs     WeightLog[]
   habitLogs      HabitLog[]
   mealLogs       MealLog[]
+  labReports     LabReport[]
 }
 
 model Profile {
@@ -62,4 +63,46 @@ model MealLog {
   eatenAt  DateTime @default(now())
 
   @@index([userId, eatenAt])
+}
+
+enum LabReportStatus {
+  processing
+  done
+  error
+}
+
+enum LabResultFlag {
+  low
+  normal
+  high
+  unknown
+}
+
+model LabReport {
+  id           String          @id @default(cuid())
+  userId       String
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName     String
+  filePath     String
+  status       LabReportStatus @default(processing)
+  errorMessage String?
+  reportDate   DateTime?       @db.Date
+  createdAt    DateTime        @default(now())
+  results      LabResult[]
+
+  @@index([userId, createdAt])
+}
+
+model LabResult {
+  id          String        @id @default(cuid())
+  labReportId String
+  labReport   LabReport     @relation(fields: [labReportId], references: [id], onDelete: Cascade)
+  name        String
+  value       Float
+  unit        String
+  refLow      Float?
+  refHigh     Float?
+  flag        LabResultFlag @default(unknown)
+
+  @@index([labReportId])
 }
