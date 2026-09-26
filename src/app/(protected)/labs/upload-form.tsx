@@ -24,7 +24,7 @@ export function UploadForm() {
                         type="file"
                         accept="application/pdf"
                         required
-                        className="text-sm text-[var(--color-text-secondary)] file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--color-bg)] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[var(--color-text)]"
+                        className="text-sm text-[var(--color-text-secondary)] file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-[var(--color-bg)] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[var(--color-text)]"
                     />
                 </div>
                 <Button type="submit" disabled={pending} className="shrink-0">

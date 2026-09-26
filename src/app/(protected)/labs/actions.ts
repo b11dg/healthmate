@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { uploadLabReportFile } from "@/lib/lab-storage";
 import { parseLabReportPdf, LabParseError } from "@/lib/gemini";
 import { computeFlag } from "@/lib/lab-flag";
+import { normalizeLabResultName } from "@/lib/lab-name";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -64,7 +65,7 @@ export async function uploadLabReport(
     }
 
     try {
-        const results = await parseLabReportPdf(buffer);
+        const { reportDate, results } = await parseLabReportPdf(buffer);
 
         if (results.length === 0) {
             await prisma.labReport.update({
@@ -79,7 +80,7 @@ export async function uploadLabReport(
             await prisma.labResult.createMany({
                 data: results.map((result) => ({
                     labReportId: report.id,
-                    name: result.name,
+                    name: normalizeLabResultName(result.name),
                     value: result.value,
                     unit: result.unit,
                     refLow: result.refLow,
@@ -93,7 +94,10 @@ export async function uploadLabReport(
             });
             await prisma.labReport.update({
                 where: { id: report.id },
-                data: { status: "done" },
+                data: {
+                    status: "done",
+                    reportDate: reportDate ? new Date(reportDate) : null,
+                },
             });
         }
     } catch (error) {

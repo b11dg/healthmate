@@ -11,26 +11,43 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const MODEL = "gemini-2.5-flash";
 
 const labResultSchema: Schema = {
-    type: Type.ARRAY,
-    items: {
-        type: Type.OBJECT,
-        properties: {
-            name: {
-                type: Type.STRING,
-                description: "Название показателя, как в бланке",
-            },
-            value: { type: Type.NUMBER },
-            unit: { type: Type.STRING },
-            refLow: { type: Type.NUMBER, nullable: true },
-            refHigh: { type: Type.NUMBER, nullable: true },
+    type: Type.OBJECT,
+    properties: {
+        reportDate: {
+            type: Type.STRING,
+            nullable: true,
+            description:
+                "Дата забора анализа/выдачи результатов в формате YYYY-MM-DD, если указана в документе, иначе null",
         },
-        required: ["name", "value", "unit"],
+        results: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    name: {
+                        type: Type.STRING,
+                        description: "Название показателя, как в бланке",
+                    },
+                    value: { type: Type.NUMBER },
+                    unit: { type: Type.STRING },
+                    refLow: { type: Type.NUMBER, nullable: true },
+                    refHigh: { type: Type.NUMBER, nullable: true },
+                },
+                required: ["name", "value", "unit"],
+            },
+        },
     },
+    required: ["results"],
 };
 
 const PROMPT = `Ты извлекаешь показатели из PDF с результатами анализа крови (бланк лаборатории).
-Верни массив всех найденных показателей: название (как написано в бланке), числовое значение, единица измерения, и нижняя/верхняя граница нормы, если они указаны (иначе null).
-Если документ не похож на анализ крови или показателей не найдено — верни пустой массив.`;
+Верни объект с двумя полями:
+- reportDate: дата забора анализа или выдачи результатов в формате YYYY-MM-DD, если она указана в документе, иначе null
+- results: массив всех найденных показателей — название (как написано в бланке), числовое значение, единица измерения, нижняя/верхняя граница нормы (иначе null)
+
+Важно про названия показателей: если в скобках указана аббревиатура (например (HCT), (E2), (MCHC)) — всегда пиши её латинскими ASCII-буквами, даже если в оригинале она набрана похожими кириллическими символами (Н, Е, М, С, Т, Х и т.п. вместо H, E, M, C, T, X). Один и тот же показатель на разных бланках должен получать абсолютно одинаковое название символ-в-символ, чтобы его можно было сопоставить между анализами.
+
+Если документ не похож на анализ крови или показателей не найдено — верни results: [].`;
 
 export type ParsedLabResult = {
     name: string;
@@ -40,11 +57,16 @@ export type ParsedLabResult = {
     refHigh: number | null;
 };
 
+export type ParsedLabReport = {
+    reportDate: string | null;
+    results: ParsedLabResult[];
+};
+
 export class LabParseError extends Error {}
 
 export async function parseLabReportPdf(
     pdfBuffer: Buffer,
-): Promise<ParsedLabResult[]> {
+): Promise<ParsedLabReport> {
     const pdfPart = createPartFromBase64(
         pdfBuffer.toString("base64"),
         "application/pdf",
@@ -80,11 +102,27 @@ export async function parseLabReportPdf(
         throw new LabParseError("Gemini вернул невалидный JSON");
     }
 
-    if (!Array.isArray(parsed)) {
+    if (
+        typeof parsed !== "object" ||
+        parsed === null ||
+        !Array.isArray((parsed as { results?: unknown }).results)
+    ) {
         throw new LabParseError("Gemini вернул неожиданный формат ответа");
     }
 
-    return parsed.filter(isRawResult).map(normalizeResult);
+    const { reportDate, results } = parsed as {
+        reportDate?: unknown;
+        results: unknown[];
+    };
+
+    return {
+        reportDate: isValidDateString(reportDate) ? reportDate : null,
+        results: results.filter(isRawResult).map(normalizeResult),
+    };
+}
+
+function isValidDateString(value: unknown): value is string {
+    return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
 function isRawResult(item: unknown): item is Record<string, unknown> {
