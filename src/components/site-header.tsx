@@ -7,6 +7,8 @@ import { signOutAction } from "@/lib/actions";
 const navLinks = [
     { href: "/dashboard", label: "Дашборд" },
     { href: "/labs", label: "Анализы" },
+    { href: "/chat", label: "Чат" },
+    { href: "/recommendations", label: "Рекомендации" },
     { href: "/profile", label: "Профиль" },
 ];
 
