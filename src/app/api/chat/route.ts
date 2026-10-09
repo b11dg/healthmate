@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { buildSystemPrompt } from "@/lib/rag";
 import { EmbeddingError } from "@/lib/embeddings";
+import { checkAndAwardAchievements } from "@/lib/badges";
 
 const google = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY });
 const MODEL = "gemini-2.5-flash";
@@ -51,6 +52,7 @@ export async function POST(req: Request) {
     await prisma.chatMessage.create({
         data: { conversationId, role: "user", content: question },
     });
+    await checkAndAwardAchievements(userId);
 
     let systemPrompt: string;
     try {

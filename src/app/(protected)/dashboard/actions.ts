@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { checkAndAwardAchievements } from "@/lib/badges";
 
 function todayDate() {
     const now = new Date();
@@ -57,6 +58,7 @@ export async function logHabit(_prevState: string | null, formData: FormData) {
                 ...(sleepHours !== undefined ? { sleepHours } : {}),
             },
         });
+        await checkAndAwardAchievements(userId);
     } catch (error) {
         console.error("logHabit failed", error);
         return "Не удалось сохранить — сервис временно недоступен. Попробуйте позже.";
@@ -98,6 +100,7 @@ export async function logMeal(_prevState: string | null, formData: FormData) {
                 carbsG,
             },
         });
+        await checkAndAwardAchievements(userId);
     } catch (error) {
         console.error("logMeal failed", error);
         return "Не удалось сохранить приём пищи — сервис временно недоступен. Попробуйте позже.";

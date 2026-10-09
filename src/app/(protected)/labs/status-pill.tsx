@@ -1,4 +1,5 @@
 import type { LabReportStatus } from "@prisma/client";
+import { RisingBarsLoading } from "@/components/rising-bars-loading";
 
 const config: Record<
     LabReportStatus,
@@ -28,10 +29,14 @@ export function StatusPill({ status }: { status: LabReportStatus }) {
             className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium whitespace-nowrap"
             style={{ background: bg, color: fg }}
         >
-            <span
-                className="h-1.5 w-1.5 rounded-full"
-                style={{ background: fg }}
-            />
+            {status === "processing" ? (
+                <RisingBarsLoading size={14} />
+            ) : (
+                <span
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{ background: fg }}
+                />
+            )}
             {label}
         </span>
     );
