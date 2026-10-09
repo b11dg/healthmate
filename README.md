@@ -2,11 +2,11 @@
 
 Персональный веб-трекер здоровья: привычки, вес и питание, AI-разбор медицинских анализов, чат с опорой на личные данные (RAG). Pet-проект для практики Next.js, баз данных и Spec-Driven Development.
 
-Полная спека и модель данных — в [`context/SPEC.md`](context/SPEC.md). Ход разработки по фазам — в [`context/PROGRESS.md`](context/PROGRESS.md). Мини-спеки по фазам — в `context/specs/`.
+Описание продукта и архитектура — [`context/project-overview.md`](context/project-overview.md) и [`context/architecture.md`](context/architecture.md). Активная задача и история фаз — [`context/current-feature.md`](context/current-feature.md). Архив мини-спек по фазам — `context/feature/`.
 
 ## Стек
 
-Next.js (App Router, TypeScript) · Tailwind CSS · Prisma · Postgres/pgvector через Supabase · Auth.js · Claude API
+Next.js (App Router, TypeScript) · Tailwind CSS · Prisma · Postgres/pgvector через Supabase · Auth.js · Google Gemini API
 
 ## Разработка
 
