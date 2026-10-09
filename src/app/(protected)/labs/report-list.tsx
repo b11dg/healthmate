@@ -3,6 +3,7 @@ import type { LabReport } from "@prisma/client";
 import { cardClassName } from "@/components/ui/card";
 import { FormError } from "@/components/ui/form-error";
 import { StatusPill } from "./status-pill";
+import { LabStatusWatcher } from "./status-watcher";
 
 type ReportWithCount = LabReport & { _count: { results: number } };
 
@@ -48,6 +49,9 @@ export function ReportList({ reports }: { reports: ReportWithCount[] }) {
                         ) : null}
                     </div>
                     <StatusPill status={report.status} />
+                    {report.status === "processing" && (
+                        <LabStatusWatcher reportId={report.id} />
+                    )}
                 </div>
             ))}
         </div>
