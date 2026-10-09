@@ -17,6 +17,7 @@ model User {
   mealLogs       MealLog[]
   labReports     LabReport[]
   conversations  Conversation[]
+  achievements   Achievement[]
 }
 
 model Profile {
@@ -133,6 +134,16 @@ model ChatMessage {
   createdAt      DateTime     @default(now())
 
   @@index([conversationId, createdAt])
+}
+
+model Achievement {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeKey String
+  earnedAt DateTime @default(now())
+
+  @@unique([userId, badgeKey])
 }
 
 // embedding is Unsupported("vector(768)") — pgvector has no native Prisma

@@ -3,6 +3,8 @@ import { cardClassName } from "@/components/ui/card";
 import { getDashboardData } from "./data";
 import { QuickLogForms } from "./quick-log-forms";
 import { DashboardCharts } from "./dashboard-charts";
+import { getAchievementsSummary } from "@/lib/badges";
+import { AchievementsCard } from "./achievements-card";
 
 function StatTile({ label, value }: { label: string; value: string }) {
     return (
@@ -24,7 +26,10 @@ export default async function DashboardPage({
 }) {
     const session = await auth();
     const days = (await searchParams).days === "30" ? 30 : 7;
-    const data = await getDashboardData(session!.user.id, days);
+    const [data, achievements] = await Promise.all([
+        getDashboardData(session!.user.id, days),
+        getAchievementsSummary(session!.user.id),
+    ]);
 
     return (
         <div className="mx-auto flex max-w-4xl flex-col gap-8">
@@ -68,6 +73,11 @@ export default async function DashboardPage({
                 </h2>
                 <QuickLogForms />
             </section>
+
+            <AchievementsCard
+                currentStreak={achievements.currentStreak}
+                earned={achievements.earned}
+            />
 
             <DashboardCharts series={data.series} days={days} />
         </div>
